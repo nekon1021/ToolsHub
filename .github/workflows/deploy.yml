@@ -1,81 +1,62 @@
-name: Deploy to VPS
+name: Deploy to Production (toolshub.jp)
 
 on:
-  push: { branches: [ main ] }
-  workflow_dispatch: {}
-concurrency: { group: prod-deploy, cancel-in-progress: true }
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
-      # 0) ソース取得（CIでビルドするために必要）
+      # 0) ソース取得
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 1) Node をセットアップして Vite ビルド
+      # 1) Vite ビルド（必要ないならこの3ステップを丸ごと削ってOK）
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22.11.0'   # ←ローカルと合わせる（.nvmrc があればそれに合わせる）
-          cache: 'npm'
+          node-version: "22.11.0"
+          cache: "npm"
       - name: Install deps
         run: npm ci || npm install
       - name: Build assets (Vite)
-        run: npm run build
-        # ここで ./public/build/ と ./public/build/manifest.json が生成される
+        run: npm run build   # => ./public/build/ を生成
 
-      # 2) VPS の known_hosts 登録（そのまま流用）
-      - name: Add VPS host to known_hosts
+      # 2) SSH鍵と known_hosts をランナーに配置（新しい6つのSecretsを使用）
+      - name: Write SSH key & known_hosts
         run: |
+          umask 077
           mkdir -p ~/.ssh
-          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
 
-      # 3) public/build を VPS に配布（rsync/SCP）
-      - name: Upload public/build to VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: "public/build/*"
-          target: "/home/deploy/app/public/build"
-          strip_components: 2
-          overwrite: true
+      # 3) （任意）SSH接続テスト
+      - name: Sanity check SSH connectivity
+        run: |
+          ssh -p "${{ secrets.SSH_PORT }}" -i ~/.ssh/id_ed25519 \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "echo 'SSH OK on ' \$(hostname); uname -a"
 
-      # 4) アプリのデプロイ（あなたの既存手順を実行）
-      - name: Deploy over SSH (composer, migrate, caches)
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            set -euo pipefail
-            cd /home/deploy/app
+      # 4) public/build をサーバへアップロード（appleboyは使わず scp で）
+      - name: Upload built assets
+        run: |
+          ssh -p "${{ secrets.SSH_PORT }}" -i ~/.ssh/id_ed25519 \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "mkdir -p '${{ secrets.APP_PATH }}/public/build'"
+          scp -P "${{ secrets.SSH_PORT }}" -i ~/.ssh/id_ed25519 -r \
+            public/build/* \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.APP_PATH }}/public/build/"
 
-            git fetch --all --prune
-            git checkout main
-            git pull --ff-only origin main
+      # 5) サーバ側のデプロイスクリプトを実行
+      - name: Deploy (server-side script)
+        run: |
+          ssh -p "${{ secrets.SSH_PORT }}" -i ~/.ssh/id_ed25519 \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "bash -lc '${{ secrets.APP_PATH }}/deploy.sh'"
 
-            # メンテモード（シークレットURL対応）
-            docker compose exec -T -w /var/www/html app php artisan down --secret="${{ secrets.DEPLOY_SECRET }}"
-
-            # PHP依存の更新
-            docker compose exec -T -w /var/www/html app composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-progress || true
-
-            # DBマイグレーション
-            docker compose exec -T -w /var/www/html app php artisan migrate --force
-
-            # Laravelキャッシュ再生成（Vite manifest を読むビューの更新が目的）
-            docker compose exec -T -w /var/www/html app php artisan optimize:clear
-            docker compose exec -T -w /var/www/html app php artisan config:cache
-            docker compose exec -T -w /var/www/html app php artisan route:cache
-            docker compose exec -T -w /var/www/html app php artisan view:cache
-
-            docker compose exec -T -w /var/www/html app php artisan up
-
-      # 5) メンテ明けウォームアップ（任意）
-      - name: Warmup (optional)
-        run: curl -fsS "https://toolshub.jp/${{ secrets.DEPLOY_SECRET }}" || true
+      - name: Done
+        run: echo "✅ Production deploy completed."
