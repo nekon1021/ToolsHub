@@ -29,10 +29,13 @@ jobs:
       # 2) SSH鍵と known_hosts をランナーに配置（新しい6つのSecretsを使用）
       - name: Write SSH key & known_hosts
         run: |
+          set -euo pipefail
           umask 077
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
-          echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          # echo ではなく printf。改行や末尾改行の扱いを安定させる
+          printf '%s' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
 
       # 3) （任意）SSH接続テスト
       - name: Sanity check SSH connectivity
