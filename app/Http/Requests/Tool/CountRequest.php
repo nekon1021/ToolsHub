@@ -27,12 +27,4 @@ class CountRequest extends FormRequest
             'normalize' => 'sometimes|boolean',
         ];
     }
-
-    public function messages(): array
-    {
-        return [
-            'text.present' => '文字列を入力してください。',
-            'text.max' => '文字が長すぎます。(最大20,000文字)。',
-        ];
-    }
 }

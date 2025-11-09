@@ -103,11 +103,64 @@ return [
     'url'                  => ':attributeは有効なURLを指定してください。',
     'uuid'                 => ':attributeは有効なUUIDを指定してください。',
 
+    'image_unreadable' => '有効な画像を指定してください。',
+    'max_pixels'       => '画像が大きすぎます（合計ピクセルが :max を超えています）。',
+
+    'custom' => [
+        // 画像圧縮ツール（フィールド別カスタム）
+        'image' => [
+            'required' => '画像ファイルを選択してください。',
+            'image'    => '画像ファイルのみアップロードできます。',
+            'mimes'    => '対応形式: jpeg, png, webp, avif',
+            // max（file）は :max がKBで入ります（Laravel既定）
+            'max'      => 'ファイルサイズが大きすぎます（最大: :max KB）。',
+        ],
+
+        // 文字カウントの共通メッセージ
+        'text' => [
+            'present' => '文字列を入力してください。',
+            'max' => '文字が長すぎます。(最大20,000文字)。',
+        ],
+
+        'quality' => [
+            // フォームルールが integer|between:1,100 の想定
+            'integer' => 'quality は整数で指定してください。',
+            'min'     => 'quality は :min 以上で指定してください。',
+            'max'     => 'quality は :max 以下で指定してください。',
+        ],
+
+        'format' => [
+            // ルールが in:jpeg,png,webp,avif の想定
+            'in' => 'format は jpeg/png/webp/avif のみ対応です。',
+        ],
+
+        'resize_width' => [
+            // ルールが integer|between:1,8000 の想定
+            'integer' => 'resize_width は整数で指定してください。',
+            'min'     => 'resize_width は :min 以上で指定してください。',
+            'max'     => 'resize_width は :max 以下で指定してください。',
+        ],
+
+        'resize_height' => [
+            // ルールが integer|between:1,8000 の想定
+            'integer' => 'resize_height は整数で指定してください。',
+            'min'     => 'resize_height は :min 以上で指定してください。',
+            'max'     => 'resize_height は :max 以下で指定してください。',
+        ],
+    ],
+
     'attributes' => [
         // フォーム項目名の日本語ラベル（任意）
         'email' => 'メールアドレス',
         'name'  => '名前',
         'password' => 'パスワード',
         'text' => '文字',
+
+        // 画像圧縮ツール
+        'image'         => '画像ファイル',
+        'quality'       => '画質',
+        'format'        => '出力形式',
+        'resize_width'  => 'リサイズ幅',
+        'resize_height' => 'リサイズ高さ',
     ],
 ];

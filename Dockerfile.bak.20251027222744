@@ -1,0 +1,40 @@
+# ===== 1) Composer stage (PHP + composer + bcmath + zip + git) =====
+FROM php:8.3-cli AS vendor
+ENV COMPOSER_ALLOW_SUPERUSER=1
+# OSパッケージ & PHP拡張
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends git unzip libzip-dev \
+  && docker-php-ext-install bcmath zip \
+  && rm -rf /var/lib/apt/lists/*
+# composer コマンド
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+WORKDIR /app
+# まだソース全体は入れない（scriptsでartisanを呼ばせないため）
+COPY composer.json composer.lock ./
+# ← artisanが無い段階なので --no-scripts で実行
+RUN composer install --no-dev --no-progress --prefer-dist --no-interaction --no-scripts
+# ここで全ファイルをコピー
+COPY . .
+# 依存は揃っているので最適化のみ（scriptsは走らせない）
+RUN composer dump-autoload --classmap-authoritative --no-interaction
+
+# ===== 2) Frontend build (Vite) =====
+FROM node:20 AS frontend
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# ===== 3) Runtime (php-fpm) =====
+FROM php:8.3-fpm
+# 本番でも必要な拡張を入れる
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends libzip-dev \
+  && docker-php-ext-install pdo_mysql opcache bcmath zip \
+  && rm -rf /var/lib/apt/lists/*
+WORKDIR /var/www/html
+COPY --from=vendor /app /var/www/html
+COPY --from=frontend /app/public/build /var/www/html/public/build
+RUN chown -R www-data:www-data storage bootstrap/cache
+EXPOSE 9000

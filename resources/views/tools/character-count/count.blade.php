@@ -24,17 +24,13 @@
       {{-- <x-ad.slot id="tool-top" class="my-4" /> --}}
       {{-- @includeIf('partials.ads.tool-top') --}}
 
-      @if ($errors->any())
-        <div class="p-3 bg-red-100 text-red-700 rounded text-sm">
-          <ul class="list-disc ml-5">
-            @foreach ($errors->all() as $e) <li>{{ $e }}</li> @endforeach
-          </ul>
-        </div>
-      @endif
-
       @php($r = session('count_result'))
       @php($hasResult = $r !== null)
 
+      {{-- 全体エラー --}}
+      <x-form.errors-summary class="mb-6" />
+
+      {{-- コンテンツ部分 --}}
       <form id="count_form" method="POST" action="{{ route('tools.charcount.run') }}" class="space-y-3">
         @csrf
         <x-textarea

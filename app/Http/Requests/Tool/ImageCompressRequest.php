@@ -3,31 +3,51 @@
 namespace App\Http\Requests\Tool;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use App\Rules\MaxPixels;
 class ImageCompressRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         return [
-            'images'      => ['required','array','max:20'],
-            'images.*'    => ['file','image','mimes:jpeg,jpg,png,webp','max:10240'],
+            // アップロード画像本体
+            'image'         => [
+                'bail', 'required', 'file', 'image',
+                // SVGはXSS観点で除外推奨
+                'mimes:jpeg,jpg,png,webp,avif',
+                'mimetypes:image/jpeg,image/png,image/webp,image/avif',
+            // 例: 5MB
+                'max:5120',
+                new MaxPixels(40_000_000),
+            ],
+            // オプション
+            'quality'       => ['nullable', 'integer', 'min:1', 'max:100'],
+            'format'        => ['nullable', 'in:jpeg,png,webp,avif'],
+            'resize_width'  => ['nullable', 'integer', 'min:1', 'max:8000'],
+            'resize_height' => ['nullable', 'integer', 'min:1', 'max:8000'],
         ];
     }
 
-    public function messages(): array
+     public function validated($key = null, $default = null)
     {
-        return [
-            'images.required' => '画像を選択してください。',
-            'images.array'    => '画像の送信形式が不正です。',
-            'images.max'      => '一度にアップロードできるのは最大20枚です。',
-            'images.*.image'  => '画像ファイルを選択してください。',
-            'images.*.mimes'  => '対応形式は JPEG / PNG / WebP です。',
-            'images.*.max'    => '各ファイルは最大10MBまでです。',
-        ];
+        $data = parent::validated($key, $default);
+
+        // デフォルト値をここで補完
+        $data['quality'] = (int)($data['quality'] ?? 85);
+        $data['format']  = $data['format'] ?? 'jpeg';
+
+        return $data;
     }
 }
