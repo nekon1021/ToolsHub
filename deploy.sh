@@ -15,7 +15,7 @@ echo "==> Sync from ${SRC_DIR} to ${DEST_DIR}"
 ## 2) コード同期（rsync）
 ##   ※ .env / storage / vendor / node_modules / public/uploads は本番の状態を保持したいので除外
 ##
-rsync -av --delete \
+if ! rsync -av --delete \
   --exclude '.git' \
   --exclude '.github' \
   --exclude 'storage' \
@@ -23,15 +23,18 @@ rsync -av --delete \
   --exclude 'node_modules' \
   --exclude '.env' \
   --exclude 'public/uploads' \
-  --exclude 'backup_db.sh' \
-  --exclude 'backup.db.sh' \
-  --exclude 'docker/mysql' \
+  --exclude 'backup_db.sh*' \
+  --exclude 'backup.db.sh*' \
+  --exclude 'docker/mysql/**' \
   --exclude 'db_backups' \
   --exclude 'db_bakups' \
   "${SRC_DIR}/" "${DEST_DIR}/"
-
-
-echo "==> Sync finished"
+then
+  RSYNC_EXIT=$?
+  echo "WARNING: rsync finished with exit code ${RSYNC_EXIT} (おそらく backup_db.sh や docker/mysql の権限問題です)。デプロイは続行します。"
+else
+  echo "==> Sync finished"
+fi
 
 ##
 ## 3) Docker 本番ディレクトリに移動してから、docker compose を実行
