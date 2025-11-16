@@ -23,7 +23,13 @@ rsync -av --delete \
   --exclude 'node_modules' \
   --exclude '.env' \
   --exclude 'public/uploads' \
+  --exclude 'backup_db.sh' \
+  --exclude 'backup.db.sh' \
+  --exclude 'docker/mysql' \
+  --exclude 'db_backups' \
+  --exclude 'db_bakups' \
   "${SRC_DIR}/" "${DEST_DIR}/"
+
 
 echo "==> Sync finished"
 
