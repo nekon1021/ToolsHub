@@ -119,7 +119,7 @@
       {{-- パーシャル派: @includeIf('partials.ads.tool-mid') --}}
 
       <section class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-700 space-y-3">
-        <h2 class="font-semibold text-gray-800">このツールについて</h2>
+        <h2 class="font-semibold text-gray-800">このツールについて（テスト）</h2>
         <p>
           この画像圧縮ツールは、JPEG / PNG / WebP / AVIF への変換と、品質の調整・リサイズを
           まとめて行えるシンプルな画像最適化サービスです。投稿画像の容量を減らしたいときや、
