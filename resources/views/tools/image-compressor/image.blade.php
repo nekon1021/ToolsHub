@@ -3,7 +3,7 @@
 
 @section('title', '画像圧縮｜' . config('app.name'))
 
-@section('meta_description', 'JPEG PNG WebP AVIFの画像圧縮と変換に対応。品質調整・リサイズ可能。ドラッグ＆ドロップでアップロードし、軽量画像をすぐにダウンロード。')
+@section('meta_description', 'JPEG PNG WebPの画像圧縮と変換に対応。品質調整・リサイズ可能。ドラッグ＆ドロップでアップロードし、軽量画像をすぐにダウンロード。')
 
 @section('content')
   <div class="mx-auto max-w-5xl px-4">
@@ -81,7 +81,6 @@
           <select name="format" class="border p-2 w-full">
             <option value="jpeg">JPEG</option>
             <option value="webp">WEBP</option>
-            <option value="avif">AVIF</option>
             <option value="png">PNG</option>
           </select>
           <x-form.field-error name="format" />
@@ -150,7 +149,7 @@
           <div>
             <dt class="font-semibold">対応形式と制限</dt>
             <dd class="ml-6">
-              ・アップロード可能な画像形式：JPEG / JPG / PNG / WebP / AVIF<br>
+              ・アップロード可能な画像形式：JPEG / JPG / PNG / WebP<br>
               ・最大サイズ：5MB、最大画素数：4,000万ピクセル<br>
               ・WebP はサーバー環境によりエンコードできない場合があります<br>
             </dd>
