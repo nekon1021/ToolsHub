@@ -119,9 +119,9 @@
       {{-- パーシャル派: @includeIf('partials.ads.tool-mid') --}}
 
       <section class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-700 space-y-3">
-        <h2 class="font-semibold text-gray-800">このツールについて（テスト）</h2>
+        <h2 class="font-semibold text-gray-800">このツールについて</h2>
         <p>
-          この画像圧縮ツールは、JPEG / PNG / WebP / AVIF への変換と、品質の調整・リサイズを
+          この画像圧縮ツールは、JPEG / PNG / WebP への変換と、品質の調整・リサイズを
           まとめて行えるシンプルな画像最適化サービスです。投稿画像の容量を減らしたいときや、
           Webサイト・ブログ・SNS 用に軽量な画像を作りたいときにご利用いただけます。
         </p>
@@ -134,14 +134,13 @@
               <strong>JPEG：</strong>写真・スクリーンショットなど階調が多い画像向け。圧縮率が高く、WebブログやSNSで最も使われます。<br>
               <strong>PNG：</strong>ロゴ・イラスト・UIパーツなど、輪郭がはっきりした画像に最適。透過背景に対応し、画質を落とさず保存できます。<br>
               <strong>WebP：</strong>JPEGより軽く、高画質を保ちやすい次世代形式。写真・イラストどちらでも軽量化効果が高く、サイト高速化に有効です。<br>
-              <strong>AVIF：</strong>最も高い圧縮率を持つ次世代画像。高画質・超軽量で、Webパフォーマンスを追求する用途に最適（ただし一部環境で非対応の場合あり）。<br>
             </dd>
           </div>
           
           <div>
             <dt class="font-semibold">主な機能</dt>
             <dd class="ml-6">
-              ・画像形式の変換（JPEG / PNG / WebP / AVIF）<br>
+              ・画像形式の変換（JPEG / PNG / WebP）<br>
               ・品質（1〜100）の調整によるファイルサイズ削減<br>
               ・任意の最大幅・最大高を指定してリサイズ（縦横比は自動調整）<br>
               ・透明背景の画像を JPEG に変換する際は白背景に自動補正<br>
@@ -153,7 +152,7 @@
             <dd class="ml-6">
               ・アップロード可能な画像形式：JPEG / JPG / PNG / WebP / AVIF<br>
               ・最大サイズ：5MB、最大画素数：4,000万ピクセル<br>
-              ・WebP・AVIF はサーバー環境によりエンコードできない場合があります<br>
+              ・WebP はサーバー環境によりエンコードできない場合があります<br>
             </dd>
           </div>
 
