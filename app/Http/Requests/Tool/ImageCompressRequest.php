@@ -40,13 +40,24 @@ class ImageCompressRequest extends FormRequest
         ];
     }
 
-     public function validated($key = null, $default = null)
+    public function validated($key = null, $default = null)
     {
         $data = parent::validated($key, $default);
 
         // デフォルト値をここで補完
         $data['quality'] = (int)($data['quality'] ?? 85);
-        $data['format']  = $data['format'] ?? 'jpeg';
+
+        if (empty($data['format'])) {
+            $extension = strtolower((string) $this->file('image')?->extension());
+
+            $data['format'] = match ($extension) {
+                'jpg', 'jpeg' => 'jpeg',
+                'png'        => 'png',
+                'webp'       => 'webp',
+                'avif'       => 'avif',
+                default      => 'jpeg',
+            };
+        }
 
         return $data;
     }
