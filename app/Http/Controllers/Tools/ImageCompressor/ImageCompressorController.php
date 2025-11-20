@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Tools\ImageCompressor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tool\ImageCompressRequest;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Interfaces\ImageInterface;
 use Intervention\Image\Drivers\Imagick\Driver as ImagickDriver;
@@ -77,6 +78,12 @@ class ImageCompressorController extends Controller
             );
 
         } catch (\Throwable $e) {
+            Log::error('Image compression failed', [
+                'exception'       => $e,
+                'client_filename' => $file?->getClientOriginalName(),
+                'detected_format' => $data['format'] ?? null,
+            ]);
+
             return back()
                 ->withInput()
                 ->withErrors(['image' => '画像の処理に失敗しました。再度お試しください。']);
